@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: rgb(255, 255, 255);
+}
+
+section.flag {
+  height: 100vh;
+  width: 100vw;
+}
+</style>
+
+<body>
+ <section class="flag"></section>
+</body>
+
+<script>
+  const section = document.querySelector("section.flag")
+const image = "https://tse3.mm.bing.net/th?id=OIP.DtkzxQioUGumnIOhpmXMTQHaEo&pid=Api&P=0&h=180"
+
+
+const item = section.clientHeight / section.clientWidth
+
+const scene = new THREE.Scene()
+const camera = new THREE.PerspectiveCamera(75, item, 0.1, 1000);
+
+const renderer = new THREE.WebGLRenderer({
+  alpha: true,
+  anialias: true 
+});
+
+renderer.setSize( section.clientHeight , section.clientWidth)
+section.appendChild( renderer.domElement );
+
+const loader = new THREE.TextureLoader();
+
+const geometry = new THREE.PlaneGeometry(5, 3, 50, 30);
+
+const material = new THREE.MeshBasicMaterial({
+  map: loader.load(image)
+});
+
+const flag = new THREE.Mesh( geometry, material );
+scene.add( flag );
+
+flag.rotation.set(-0.1, 0, 0)
+camera.position.z = 5;
+
+const clock = new THREE.Clock()
+
+function animate () {
+  const t = clock.getElapsedTime();
+  
+  flag.geometry.vertices.map(v => {
+    const waveX1 = 0.5 * Math.sin(v.x * 2 + 1)
+    const waveX2 = 0.25 * Math.sin(v.x * 3 + t * 2)
+    const waveY1 = 0.1 * Math.sin(v.y * 5 + t * 0.5)
+    const multi = (v.x + 2.5) / 5
+    
+    v.z = (waveX1 + waveX2 + waveY1) * multi
+  })
+  // cube.rotation.x += 0.01;
+  // cube.rotation.y += 0.01;
+  
+  flag.geometry.verticesNeedUpdate = true
+  
+  requestAnimationFrame( animate );
+  renderer.render( scene, camera );
+}
+
+animate();
+ 
+window.addEventListener("resize", function () {
+  camera.aspect = section.clientWidth / section.clientHeight
+  camera.updateProjectionMatrix()
+  
+  renderer.setSize(  section.clientWidth, section.clientHeight )
+})
+</script>
